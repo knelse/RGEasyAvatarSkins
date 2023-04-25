@@ -31,13 +31,50 @@ public class RGEasyAvatarSkinsMod : RogueGenesiaMod
     {
         base.OnModLoaded(modData);
         Debug.Log($"EasyAvatarSkins loaded from: {modData.ModDirectory.FullName}");
-
-        var skinFolders = Directory.EnumerateDirectories(modData.ModDirectory.FullName).ToList();
         
-        foreach (var skinFolder in skinFolders)
+        // load bundled skin
+        var bundledSkinFiles = Directory.EnumerateFiles(Path.Combine(modData.ModDirectory.FullName, "Potato"), "*.png")
+            .ToList();
+        foreach (var skinFilePath in bundledSkinFiles)
         {
-            var skinFilePaths = Directory.EnumerateFiles(skinFolder, "*.png").ToList();
-            foreach (var skinFilePath in skinFilePaths)
+            AddSkinFile(skinFilePath);
+        }
+
+        // load workshop dependencies
+        foreach (var skinMod in modData.DependedBy.Where(x => x.Enabled))
+        {
+            // this should be redundant
+            if (!Directory.Exists(skinMod.ModDirectory.FullName))
+            {
+                continue;
+            }
+            var skinFiles = Directory.EnumerateFiles(skinMod.ModDirectory.FullName, "*.png").ToList();
+            foreach (var skinFilePath in skinFiles)
+            {
+                AddSkinFile(skinFilePath, skinMod.GetModName());
+            }
+        }
+
+        var gameDirectoryModsFolder = Path.Combine(modData.ModDirectory.Parent.Parent.Parent.Parent.FullName,
+            "Rogue Genesia", "Modded", "Mods");
+        Debug.Log(gameDirectoryModsFolder);
+
+        // load any remaining skins from game mods folder
+        if (!Directory.Exists(gameDirectoryModsFolder))
+        {
+            return;
+        }
+        
+        foreach (var modFolder in Directory.EnumerateDirectories(gameDirectoryModsFolder))
+        {
+            var skinFilePaths = Directory.EnumerateFiles(modFolder).ToList();
+            // exlude duplicates if mod is already added as dependency above and limit scanning other mods' files
+            if (skinFilePaths.Any(x => Path.GetExtension(x) == ".rgmod"))
+            {
+                Debug.Log($"Skipping {modFolder}");
+                continue;
+            }
+            foreach (var skinFilePath in skinFilePaths.Where(x => Path.GetExtension(x) == ".png"))
             {
                 AddSkinFile(skinFilePath);
             }
@@ -104,9 +141,9 @@ public class RGEasyAvatarSkinsMod : RogueGenesiaMod
     
     private static void LogError (string message) => Debug.LogError($"EasyAvatarSkins ERROR: {message}");
 
-    private void AddSkinFile(string filePath)
+    private void AddSkinFile(string filePath, string? modName = null)
     {
-        var skinPackName = new DirectoryInfo(Path.GetDirectoryName(filePath)!).Name;
+        var skinPackName = modName ?? new DirectoryInfo(Path.GetDirectoryName(filePath)!).Name;
         SkinReplacementType animationType;
         var nameAndFramerate = Path.GetFileNameWithoutExtension(filePath)
             .Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
@@ -114,7 +151,7 @@ public class RGEasyAvatarSkinsMod : RogueGenesiaMod
         if (nameAndFramerate.Length != 3 && !(nameAndFramerate.Length == 1 && nameAndFramerate[0].ToLowerInvariant() == "icon"))
         {
             LogError($"Unable to add skin file {filePath}\n" + 
-                     "\tFile name format should be: (animation type)_(x frames)_(y frames).png, e.g. \"idlehd_5_1.png\" -- OR \"icon.png\" for avatar icon" +
+                     "\tFile name format should be: (animation type)_(x frames)_(y frames).png, e.g. \"idlehd_5_1.png\" -- OR \"icon.png\" for avatar icon. " +
                      "Name is not case sensitive\n" + 
                      "\tAnimation types are: idle, idlehd, run, victory, gameover");
             return;
