@@ -13,9 +13,7 @@ To create a new skin, navigate to mods folder, create a new folder there and add
 
 Available folders for new skins are:
 * Steam Workshop directory (something like c:\Program Files (x86)\Steam\steamapps\workshop\content\2067920\2966368775) 
-* Game directory (c:\Program Files (x86)\Steam\steamapps\common\Rogue Genesia\Modded\Mods\EasyAvatarSkins\)
-
-If you don't see EasyAvatarSkins in game directory, create that folder.
+* Game directory (c:\Program Files (x86)\Steam\steamapps\common\Rogue Genesia\Modded\Mods\)
 
 Once you create a folder for your new skin pack, any PNG file with valid name should be picked up by the mod automatically.
 
