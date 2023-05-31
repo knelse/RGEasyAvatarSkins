@@ -59,11 +59,24 @@ public class RGEasyAvatarSkinsMod : RogueGenesiaMod
                 continue;
             }
 
+            // current folder
             var skinFiles = Directory.EnumerateFiles(skinMod.ModDirectory.FullName, "*.png").ToList();
             foreach (var skinFilePath in skinFiles.Where(x => Path.GetFileNameWithoutExtension(x) != "ModIcon" &&
                          Path.GetFileNameWithoutExtension(x) != "ModPreview"))
             {
                 AddSkinFile(skinFilePath, skinMod.GetModName());
+            }
+
+            // subfolders
+            foreach (var skinFileSubdirectory in Directory.EnumerateDirectories(skinMod.ModDirectory.FullName).ToList())
+            {
+                var skinFileSubdirectoryPaths = Directory.EnumerateFiles(skinFileSubdirectory).ToList();
+                foreach (var skinFilePath in skinFileSubdirectoryPaths.Where(x =>
+                             Path.GetExtension(x) == ".png" && Path.GetFileNameWithoutExtension(x) != "ModIcon" &&
+                             Path.GetFileNameWithoutExtension(x) != "ModPreview"))
+                {
+                    AddSkinFile(skinFilePath);
+                }
             }
         }
 
@@ -85,11 +98,24 @@ public class RGEasyAvatarSkinsMod : RogueGenesiaMod
                 continue;
             }
 
+            // current folder
             foreach (var skinFilePath in skinFilePaths.Where(x =>
                          Path.GetExtension(x) == ".png" && Path.GetFileNameWithoutExtension(x) != "ModIcon" &&
                          Path.GetFileNameWithoutExtension(x) != "ModPreview"))
             {
                 AddSkinFile(skinFilePath);
+            }
+
+            // subfolders
+            foreach (var skinFileSubdirectory in Directory.EnumerateDirectories(modFolder).ToList())
+            {
+                var skinFileSubdirectoryPaths = Directory.EnumerateFiles(skinFileSubdirectory).ToList();
+                foreach (var skinFilePath in skinFileSubdirectoryPaths.Where(x =>
+                             Path.GetExtension(x) == ".png" && Path.GetFileNameWithoutExtension(x) != "ModIcon" &&
+                             Path.GetFileNameWithoutExtension(x) != "ModPreview"))
+                {
+                    AddSkinFile(skinFilePath);
+                }
             }
         }
     }
